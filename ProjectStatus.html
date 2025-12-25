@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Status Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #fd3512 0%, #700b0b 100%);
+            color: white;
+            padding: 25px 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .right-panel {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .form-container {
+            background-color: #f9fafc;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px #fd3512;
+            margin-bottom: 20px;
+        }
+
+        .form-title {
+            color: #182848;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #fd3512;
+            font-size: 1.4rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #fd3512;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .status-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .status-option {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .status-option input[type="radio"] {
+            display: none;
+        }
+
+        .status-option label {
+            display: block;
+            padding: 10px;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            transition: all 0.3s;
+        }
+
+        .status-option input[type="radio"]:checked+label {
+            border-color: #fd3512;
+            background-color: #eef2ff;
+            font-weight: 700;
+        }
+
+        .btn {
+            background: linear-gradient(to right, #fd3512, #7c1515);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-update {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+        }
+
+        .btn-cancel {
+            background: linear-gradient(to right, #757575, #424242);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-group .btn {
+            flex: 1;
+        }
+
+        .entries-container {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px #fd3512;
+        }
+
+        .entries-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            background-color: #f1f5f9;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background-color: #fd3512;
+            color: white;
+            border-color: #fd3512;
+        }
+
+        .entries-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .entry-item {
+            background-color: #f9fafc;
+            border-left: 4px solid #fd3512;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .entry-item.pending {
+            border-left-color: #ff9800;
+        }
+
+        .entry-item.completed {
+            border-left-color: #4caf50;
+        }
+
+        .entry-item.blocked {
+            border-left-color: #f44336;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .entry-date {
+            font-weight: 600;
+            color: #182848;
+            font-size: 1.1rem;
+        }
+
+        .entry-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-planning {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .status-in-progress {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .status-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-blocked {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .entry-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .entry-problems {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+        }
+
+        .entry-problems h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .entry-actions {
+            position: absolute;
+            top: 67px;
+            right: 35px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            border: none;
+            color: white;
+            font-size: 14px;
+        }
+
+        .edit-btn {
+            background-color: #2196F3;
+        }
+
+        .edit-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+        }
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .completed-badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #b0bec5;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 100px;
+            background-color: #f9fafc;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .last-updated {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .entries-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-options {
+                width: 100%;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-clipboard-list"></i> Project Status Tracker</h1>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="form-container">
+                    <h2 class="form-title" id="formHeading">Add New Entry</h2>
+                    <form id="entryForm">
+                        <input type="hidden" id="entryId" value="">
+
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="title">Title / Project Name</label>
+                            <input type="text" id="title" placeholder="Enter project title" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <div class="status-options">
+                                <div class="status-option">
+                                    <input type="radio" id="planning" name="status" value="planning" checked>
+                                    <label for="planning">Planning</label>
+                                </div>
+                                <div class="status-option">
+                                    <input type="radio" id="in-progress" name="status" value="in-progress">
+                                    <label for="in-progress">In Progress</label>
+                                </div>
+                                <div class="status-option">
+                                    <input type="radio" id="completed" name="status" value="completed">
+                                    <label for="completed">Completed</label>
+                                </div>
+                                <div class="status-option">
+                                    <input type="radio" id="blocked" name="status" value="blocked">
+                                    <label for="blocked">Blocked</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description / Progress</label>
+                            <textarea id="description" placeholder="Describe today's progress, what you worked on, etc."
+                                required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="problems">Problems / Issues</label>
+                            <textarea id="problems"
+                                placeholder="List any problems, issues, or blockers you encountered"></textarea>
+                        </div>
+
+                        <div class="button-group" id="formButtons">
+                            <button type="submit" class="btn" id="submitBtn">
+                                <i class="fas fa-plus-circle"></i> Add Entry
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalEntries">0</div>
+                        <div class="stat-label">Entries</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="inProgress">0</div>
+                        <div class="stat-label">In Progress</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="completedCount">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="entries-container">
+                    <div class="entries-header">
+                        <h2 class="form-title">Project Entries</h2>
+                        <div class="filter-options">
+                            <div class="filter-btn active" data-filter="all">All</div>
+                            <div class="filter-btn" data-filter="planning">Planning</div>
+                            <div class="filter-btn" data-filter="in-progress">In Progress</div>
+                            <div class="filter-btn" data-filter="completed">Completed</div>
+                            <div class="filter-btn" data-filter="blocked">Blocked</div>
+                        </div>
+                    </div>
+
+                    <div class="entries-list" id="entriesList">
+                        <!-- Entries will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isEditing = false;
+        let currentEditId = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set default date to today
+            document.getElementById('date').valueAsDate = new Date();
+
+            // Load entries from localStorage
+            loadEntries();
+            updateStats();
+
+            // Handle form submission
+            document.getElementById('entryForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Get form values
+                const id = document.getElementById('entryId').value;
+                const date = document.getElementById('date').value;
+                const title = document.getElementById('title').value;
+                const status = document.querySelector('input[name="status"]:checked').value;
+                const description = document.getElementById('description').value;
+                const problems = document.getElementById('problems').value;
+
+                if (isEditing && currentEditId) {
+                    // Update existing entry
+                    updateEntry(currentEditId, {
+                        id: currentEditId,
+                        date,
+                        title,
+                        status,
+                        description,
+                        problems,
+                        updatedAt: new Date().toISOString()
+                    });
+
+                    // Reset form to add mode
+                    resetForm();
+                } else {
+                    // Create new entry object
+                    const entry = {
+                        id: Date.now(),
+                        date,
+                        title,
+                        status,
+                        description,
+                        problems,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: null
+                    };
+
+                    // Save to localStorage
+                    saveEntry(entry);
+
+                    // Clear form
+                    document.getElementById('entryForm').reset();
+                    document.getElementById('date').valueAsDate = new Date();
+                }
+
+                // Reload entries
+                loadEntries();
+                updateStats();
+            });
+
+            // Handle filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // Update active filter
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Filter entries
+                    const filter = this.getAttribute('data-filter');
+                    loadEntries(filter);
+                });
+            });
+        });
+
+        function saveEntry(entry) {
+            // Get existing entries from localStorage
+            let entries = JSON.parse(localStorage.getItem('projectEntries')) || [];
+
+            // Add new entry
+            entries.push(entry);
+
+            // Save back to localStorage
+            localStorage.setItem('projectEntries', JSON.stringify(entries));
+
+            // Show success message
+            showNotification('Entry added successfully!', 'success');
+        }
+
+        function updateEntry(id, updatedEntry) {
+            // Get entries from localStorage
+            let entries = JSON.parse(localStorage.getItem('projectEntries')) || [];
+
+            // Find index of entry to update
+            const entryIndex = entries.findIndex(entry => entry.id == id);
+
+            if (entryIndex !== -1) {
+                // Preserve creation date
+                updatedEntry.createdAt = entries[entryIndex].createdAt;
+
+                // Update the entry
+                entries[entryIndex] = updatedEntry;
+
+                // Save back to localStorage
+                localStorage.setItem('projectEntries', JSON.stringify(entries));
+
+                // Show success message
+                showNotification('Entry updated successfully!', 'success');
+            }
+        }
+
+        function editEntry(id) {
+            // Get entries from localStorage
+            let entries = JSON.parse(localStorage.getItem('projectEntries')) || [];
+
+            // Find the entry to edit
+            const entry = entries.find(entry => entry.id == id);
+
+            if (entry) {
+                // Set form to edit mode
+                isEditing = true;
+                currentEditId = id;
+
+                // Update form heading
+                document.getElementById('formHeading').textContent = 'Edit Entry';
+
+                // Update submit button
+                document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Entry';
+                document.getElementById('submitBtn').classList.add('btn-update');
+
+                // Add cancel button if not already present
+                if (!document.getElementById('cancelBtn')) {
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.id = 'cancelBtn';
+                    cancelBtn.className = 'btn btn-cancel';
+                    cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+                    cancelBtn.onclick = resetForm;
+
+                    document.getElementById('formButtons').appendChild(cancelBtn);
+                }
+
+                // Populate form with entry data
+                document.getElementById('entryId').value = entry.id;
+                document.getElementById('date').value = entry.date;
+                document.getElementById('title').value = entry.title;
+
+                // Set status radio button
+                document.querySelector(`input[name="status"][value="${entry.status}"]`).checked = true;
+
+                document.getElementById('description').value = entry.description;
+                document.getElementById('problems').value = entry.problems || '';
+
+                // Scroll to form
+                document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function resetForm() {
+            // Reset form state
+            isEditing = false;
+            currentEditId = null;
+
+            // Update form heading
+            document.getElementById('formHeading').textContent = 'Add New Entry';
+
+            // Reset submit button
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus-circle"></i> Add Entry';
+            document.getElementById('submitBtn').classList.remove('btn-update');
+
+            // Remove cancel button
+            const cancelBtn = document.getElementById('cancelBtn');
+            if (cancelBtn) {
+                cancelBtn.remove();
+            }
+
+            // Clear form
+            document.getElementById('entryForm').reset();
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('entryId').value = '';
+
+            // Set default status to planning
+            document.getElementById('planning').checked = true;
+        }
+
+        function loadEntries(filter = 'all') {
+            // Get entries from localStorage
+            let entries = JSON.parse(localStorage.getItem('projectEntries')) || [];
+
+            // Sort entries by date (newest first)
+            entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Filter entries if needed
+            if (filter !== 'all') {
+                entries = entries.filter(entry => entry.status === filter);
+            }
+
+            // Get container element
+            const entriesList = document.getElementById('entriesList');
+
+            if (entries.length === 0) {
+                // Show empty state
+                entriesList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard"></i>
+                        <h3>No entries found</h3>
+                        <p>${filter === 'all' ? 'Add your first project entry using the form on the left.' : 'No entries match the selected filter.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Generate entries HTML
+            let entriesHTML = '';
+
+            entries.forEach(entry => {
+                // Format date for display
+                const dateObj = new Date(entry.date);
+                const formattedDate = dateObj.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Status display text
+                const statusText = {
+                    'planning': 'Planning',
+                    'in-progress': 'In Progress',
+                    'completed': 'Completed',
+                    'blocked': 'Blocked'
+                };
+
+                // Status class
+                const statusClass = {
+                    'planning': 'status-planning',
+                    'in-progress': 'status-in-progress',
+                    'completed': 'status-completed',
+                    'blocked': 'status-blocked'
+                };
+
+                // Check if entry was updated
+                const wasUpdated = entry.updatedAt && entry.updatedAt !== entry.createdAt;
+                let updatedInfo = '';
+
+                if (wasUpdated) {
+                    const updatedDate = new Date(entry.updatedAt);
+                    const formattedUpdatedDate = updatedDate.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+                    updatedInfo = `<div class="last-updated">Updated on: ${formattedUpdatedDate}</div>`;
+                }
+
+                entriesHTML += `
+                    <div class="entry-item ${entry.status}">
+                        ${entry.status === 'completed' ? '<div class="completed-badge">COMPLETED</div>' : ''}
+                        
+                        <div class="entry-header">
+                            <div class="entry-date">${formattedDate}</div>
+                            <div class="entry-status ${statusClass[entry.status]}">${statusText[entry.status]}</div>
+                        </div>
+                        <h3 class="entry-title">${entry.title}</h3>
+                        <p>${entry.description}</p>
+                        
+                        ${entry.problems ? `
+                        <div class="entry-problems">
+                            <h4><i class="fas fa-exclamation-triangle"></i> Problems / Issues:</h4>
+                            <p>${entry.problems}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${updatedInfo}
+                        
+                        <div class="entry-actions">
+                            <button class="action-btn edit-btn" onclick="editEntry(${entry.id})" title="Edit Entry">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteEntry(${entry.id})" title="Delete Entry">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            entriesList.innerHTML = entriesHTML;
+        }
+
+        function deleteEntry(id) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                // Get entries from localStorage
+                let entries = JSON.parse(localStorage.getItem('projectEntries')) || [];
+
+                // Filter out the entry to delete
+                entries = entries.filter(entry => entry.id !== id);
+
+                // Save back to localStorage
+                localStorage.setItem('projectEntries', JSON.stringify(entries));
+
+                // Reload entries
+                const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-filter');
+                loadEntries(activeFilter);
+                updateStats();
+
+                // If we were editing this entry, reset the form
+                if (currentEditId == id) {
+                    resetForm();
+                }
+
+                showNotification('Entry deleted successfully!', 'info');
+            }
+        }
+
+        function updateStats() {
+            // Get entries from localStorage
+            let entries = JSON.parse(localStorage.getItem('projectEntries')) || [];
+
+            // Calculate stats
+            const totalEntries = entries.length;
+            const inProgress = entries.filter(entry => entry.status === 'in-progress').length;
+            const completedCount = entries.filter(entry => entry.status === 'completed').length;
+
+            // Update stats display
+            document.getElementById('totalEntries').textContent = totalEntries;
+            document.getElementById('inProgress').textContent = inProgress;
+            document.getElementById('completedCount').textContent = completedCount;
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 6px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideIn 0.3s ease-out;
+            `;
+
+            // Set color based on type
+            if (type === 'success') {
+                notification.style.backgroundColor = '#4CAF50';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = '#f44336';
+            } else {
+                notification.style.backgroundColor = '#2196F3';
+            }
+
+            // Add to page
+            document.body.appendChild(notification);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+
+            // Add CSS animations
+            if (!document.getElementById('notificationStyles')) {
+                const style = document.createElement('style');
+                style.id = 'notificationStyles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    </script>
+</body>
+
+</html>
